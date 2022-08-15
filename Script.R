@@ -10,6 +10,9 @@
 # 0. Initializing
 rm (list = ls())
 library (tidyverse)
+# devtools::install_github("hrbrmstr/ggalt")
+library (ggalt)
+
 
 #####
 # 1. Reading data
@@ -49,7 +52,27 @@ data %>%
   geom_bar (aes(x = Company , y = dt, fill = suc), stat = "identity") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
+# 10 longest serving Rockets 
+data %>%
+  group_by (Rocket) %>%
+  mutate (min_y = min (Year), max_y = max (Year), duration_y = as.numeric(max_y) - as.numeric(min_y)) %>%
+  select(Rocket, min_y, max_y, duration_y, ) %>%
+  distinct() %>%
+  filter (min_y != max_y) %>%
+  arrange (desc(as.numeric(duration_y))) %>%
+  mutate (Rocket = factor (Rocket, levels = Rocket)) %>%
+  head (n=10) %>%
+  ggplot (aes (y= Rocket, x = min_y, xend = max_y)) +
+  geom_dumbbell (color="blue", 
+                 size=1, 
+                 colour_x ="black",
+                 colour_xend = "black") +
+  labs(x=NULL, y=NULL, title="Longest Serving Rockets") +
+  theme_minimal() +
+  theme(panel.grid.major.x=element_line(size=0.05))
 
+  
+    
 ##############################  Hic Sunt Leones
 str_sub(x,tail(str_locate_all (x,",")[[2]]$start,1), 5)
 
@@ -64,4 +87,3 @@ regmatches(x, m)
 
 x <- "Site 1/5, Baikonur Cosmodrome, Kazakhstan"
 tail(unlist(gregexpr(',', x)), n=1)
-str
