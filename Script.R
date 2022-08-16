@@ -56,7 +56,7 @@ data %>%
 data %>%
   group_by (Rocket) %>%
   mutate (min_y = min (Year), max_y = max (Year), duration_y = as.numeric(max_y) - as.numeric(min_y)) %>%
-  select(Rocket, min_y, max_y, duration_y, ) %>%
+  select(Rocket, min_y, max_y, duration_y) %>%
   distinct() %>%
   filter (min_y != max_y) %>%
   arrange (desc(as.numeric(duration_y))) %>%
