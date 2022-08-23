@@ -15,11 +15,11 @@ library (ggalt)
 
 
 #####
-# 1. Reading data
+# 1. Data Reading & Wrangling
 data <- read.csv("./data/space_missions.csv", sep = ",")
-head(data)
 data$Year <- format.Date (data$Date, format = "%Y")
-head(data)
+data <- data %>%
+  mutate (Location_New = str_sub(Location, start = Location %>% str_locate_all(",") %>% sapply(., function(x) x[[nrow(x)]]) + 2, end = str_length(Location)))
 
 
 # Number of missions
@@ -31,7 +31,7 @@ data %>%
 # Successful missions %
 data %>%
   group_by (Year) %>%
-  summarize(sum(MissionStatus=="Success")/n()) %>%
+  summarize(Success_Rate = sum(MissionStatus=="Success")/n()) %>%
   plot()
 
 # Missions by Rocket
@@ -71,19 +71,71 @@ data %>%
   theme_minimal() +
   theme(panel.grid.major.x=element_line(size=0.05))
 
-  
+# Missions by Location & Company
+data %>%
+  group_by (Location_New, Company) %>%
+  summarize(missions = n()) %>%
+  filter (missions > 15) %>%
+  ggplot () +
+  geom_bar (aes(x = Location_New , y = missions, fill = Company), color = "Black", stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+head (data)
     
-##############################  Hic Sunt Leones
-str_sub(x,tail(str_locate_all (x,",")[[2]]$start,1), 5)
+##############################  code to extract the LOCATION
 
-str_locate_all (x,",")[[1]]
-x <- head(data$Location,1)
-y <- regexpr("\,(?=[^,]*$)", x)
+# x <- data[131,]$Location
+# y <- str_locate_all (x,",")[[1]]
+# y[length(y)/2]
+# 
+# length(y)
+# 
+# data <- data %>%
+#   mutate (Location_New = str_sub(Location, 
+#                                  start = str_locate_all (Location,",")[[1]][length(str_locate_all (Location,",")[[1]])/2] + 2, 
+#                                  end = str_length(Location)))
+# 
+# data <- data %>%
+#   mutate (Location_New = Location,
+#           length = length(lapply(x = Location, FUN = str_locate_all((",")[[1]])/2)),
+#           start = str_locate_all (Location,",")[[1]][length(str_locate_all (Location,",")[[1]])/2] + 2,
+#           end = str_length(Location))
+# 
+# data <- data %>%
+#   mutate (Location_New = Location,
+#           start = Location %>%
+#             str_locate_all(",") %>% 
+#             sapply(., function(x) x[[nrow(x)]]),
+#           end = str_length(Location))
+# data$Location %>%
+#   str_locate_all(",") %>% 
+#     sapply(., function(x) x[[nrow(x)]]) 
+# 
+# tail(data,50)
+# 
+# str_sub(x, 
+#         start = str_locate_all (x,",")[[1]][length(str_locate_all (x,",")[[1]])/2] + 2, 
+#         end = str_length(x))
+# 
+# 
+# gregexpr(pattern = "\,(?=[^,]*$)",)
+# 
+# 
+# 
+# 
+# str_sub(x,tail(str_locate_all (x,",")[[2]]$start,1), 5)
+# 
+# x <- head(data$Location,1)
+# y <- regexpr("\,(?=[^,]*$)", x)
+# 
+# x <- "http://stat.umn.edu:80/xyz"
+# m <- regexec("^(([^:]+)://)?([^:/]+)(:([0-9]+))?(/.*)", x)
+# m
+# regmatches(x, m)
+# 
+# x <- "Site 1/5, Baikonur Cosmodrome, Kazakhstan"
+# tail(unlist(gregexpr(',', x)), n=1)
 
-x <- "http://stat.umn.edu:80/xyz"
-m <- regexec("^(([^:]+)://)?([^:/]+)(:([0-9]+))?(/.*)", x)
-m
-regmatches(x, m)
 
-x <- "Site 1/5, Baikonur Cosmodrome, Kazakhstan"
-tail(unlist(gregexpr(',', x)), n=1)
+
+
